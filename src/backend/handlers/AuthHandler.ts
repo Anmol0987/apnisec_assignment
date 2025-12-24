@@ -10,10 +10,10 @@ export class AuthHandler {
       const body = await req.json();
       const result = await this.authService.register(body);
       const res = NextResponse.json({ user: result.user });
-      res.cookies.set("token", result.token, {
-        httpOnly: true,
-        path: "/",
-      });
+    //   res.cookies.set("token", result.token, {
+    //     httpOnly: true,
+    //     path: "/",
+    //   });
       return res;
     } catch (error) {
       return error;

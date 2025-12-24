@@ -3,10 +3,11 @@ import { ValidationError } from "../errors/ValidationError";
 import { UserRepository } from "../repositories/UserRepository";
 import { Bcrypt } from "../utils/bcrypt";
 import { JwtUtil } from "../utils/jwt";
+import { EmailService } from "./EmailService";
 
 export class AuthService {
   private userRepo = new UserRepository();
-
+  private emailService = new EmailService();
   async register(data: { name: string; email: string; password: string }) {
     if (!data.email || !data.password || !data.name) {
       throw new ValidationError("All fields are required");
@@ -24,10 +25,9 @@ export class AuthService {
       email: data.email,
       password: hashedPassword,
     });
-
-    const token = JwtUtil.generateToken(user.id);
-
-    return { user, token };
+    // const token = JwtUtil.generateToken(user.id);
+    await this.emailService.sendWelcomeEmail(user.email,user.name)
+    return { user };
   }
 
   async login(data: { email: string; password: string }) {
@@ -51,5 +51,4 @@ export class AuthService {
 
     return user;
   }
-
 }
