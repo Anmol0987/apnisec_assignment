@@ -6,7 +6,7 @@ export class RateLimiter {
   private static store = new Map<string, RateLimitEntry>();
 
   private static WINDOW_MS = 15 * 60 * 1000;
-  private static LIMIT = 4;
+  private static LIMIT = 100;
 
   static check(key: string) {
     const now = Date.now();
