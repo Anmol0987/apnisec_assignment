@@ -1,3 +1,5 @@
+import { AuthError } from "../errors/AuthError";
+import { ValidationError } from "../errors/ValidationError";
 import { UserRepository } from "../repositories/UserRepository";
 
 export class UserService {
@@ -5,20 +7,19 @@ export class UserService {
 
   async getProfile(userId: string) {
     const user = await this.userRepo.findById(userId);
-    if (!user) throw new Error("User not found");
+    if (!user) throw new AuthError("User not found");
 
     return user;
   }
 
   async updateProfile(userId: string, data: { name: string }) {
     if (!data.name) {
-      throw new Error("Nothing to update");
+      throw new ValidationError("Nothing to update");
     }
 
     const updated = await this.userRepo.updateProfile(userId, {
       name: data.name,
     });
-    console.log(updated,"updated service")
 
     return updated;
   }

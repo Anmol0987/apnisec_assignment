@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { UserService } from "../services/UserService";
+import { AppError } from "../errors/AppError";
 
 export class Userhandler {
   private userService = new UserService();
@@ -9,8 +10,8 @@ export class Userhandler {
       const user = await this.userService.getProfile(userId);
       return NextResponse.json({ user });
     } catch (err) {
-      return err;
-    }
+        return this.handleError(err);
+      }
   }
 
   async updateProfile(req: Request, userId: string) {
@@ -19,7 +20,16 @@ export class Userhandler {
       const user = await this.userService.updateProfile(userId, body);
       return NextResponse.json({ user });
     } catch (err) {
-      return err;
+        return this.handleError(err);
+      }
+  }
+
+  private handleError(error:any){
+    if(error instanceof AppError){
+        return NextResponse.json(
+            {error:error.message},
+        {status:error.statusCode})
     }
+    return NextResponse.json({error:"Internal Server Error"},{status:500})
   }
 }

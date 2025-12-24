@@ -1,3 +1,5 @@
+import { AuthError } from "../errors/AuthError";
+import { ValidationError } from "../errors/ValidationError";
 import { UserRepository } from "../repositories/UserRepository";
 import { Bcrypt } from "../utils/bcrypt";
 import { JwtUtil } from "../utils/jwt";
@@ -7,12 +9,12 @@ export class AuthService {
 
   async register(data: { name: string; email: string; password: string }) {
     if (!data.email || !data.password || !data.name) {
-      throw new Error("All fields are required");
+      throw new ValidationError("All fields are required");
     }
 
     const existing = await this.userRepo.findByEmail(data.email);
     if (existing) {
-      throw new Error("Email already registered");
+      throw new ValidationError("Email already registered");
     }
 
     const hashedPassword = await Bcrypt.hash(data.password);
@@ -30,13 +32,13 @@ export class AuthService {
 
   async login(data: { email: string; password: string }) {
     if (!data.email || !data.password) {
-      throw new Error("Email and password required");
+      throw new ValidationError("Email and password required");
     }
     const user = await this.userRepo.findByEmail(data.email);
-    if (!user) throw new Error("Invalid credentials");
+    if (!user) throw new AuthError("Invalid credentials");
 
     const valid = await Bcrypt.compare(data.password, user.password);
-    if (!valid) throw new Error("Invalid credentials");
+    if (!valid) throw new AuthError("Invalid credentials");
 
     const token = JwtUtil.generateToken(user.id);
 
@@ -45,7 +47,7 @@ export class AuthService {
 
   async me(userId: string) {
     const user = await this.userRepo.findById(userId);
-    if (!user) throw new Error("User not found");
+    if (!user) throw new AuthError("User not found");
 
     return user;
   }

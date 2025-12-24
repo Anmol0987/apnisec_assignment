@@ -1,5 +1,6 @@
 import { IssueHandler } from "@/backend/handlers/IssueHandler";
 import { AuthMiddleware } from "@/backend/middlewares/AuthMiddleware";
+import { RateLimitMiddleWare } from "@/backend/middlewares/RateLimitMiddleware";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -10,6 +11,8 @@ export async function GET(req: Request, { params }: Params) {
 }
 
 export async function PUT(req: Request, { params }: Params) {
+  RateLimitMiddleWare.enforce(req);
+
   const userId = AuthMiddleware.authenticate(req);
   const { id } = await params;
 
@@ -17,6 +20,8 @@ export async function PUT(req: Request, { params }: Params) {
 }
 
 export async function DELETE(req: Request, { params }: Params) {
+  RateLimitMiddleWare.enforce(req);
+
   const userId = AuthMiddleware.authenticate(req);
   const { id } = await params;
 

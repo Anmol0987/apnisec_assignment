@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { AuthService } from "../services/AuthService";
+import { AppError } from "../errors/AppError";
 
 export class AuthHandler {
   private authService = new AuthService();
@@ -19,7 +20,6 @@ export class AuthHandler {
     }
   }
   async login(req: Request) {
-    console.log("inside login");
     try {
       const body = await req.json();
       const result = await this.authService.login(body);
@@ -32,7 +32,7 @@ export class AuthHandler {
 
       return res;
     } catch (err) {
-      return err;
+      return this.handleError(err);
     }
   }
   async logout() {
@@ -45,8 +45,21 @@ export class AuthHandler {
       const user = await this.authService.me(userId);
       return NextResponse.json({ user });
     } catch (err) {
-      return err;
+      return this.handleError(err);
     }
   }
 
+  private handleError(error: any) {
+    if (error instanceof AppError) {
+      return NextResponse.json(
+        { error: error.message },
+        { status: error.statusCode }
+      );
+    }
+
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
 }

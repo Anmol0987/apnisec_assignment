@@ -1,5 +1,7 @@
 import { IssuePriority, IssueStatus, IssueType } from "@prisma/client";
 import { IssueRepository } from "../repositories/IssuesRepository";
+import { ValidationError } from "../errors/ValidationError";
+import { AuthError } from "../errors/AuthError";
 
 export class IssueService{
     private issueRepo=new IssueRepository()
@@ -17,9 +19,8 @@ export class IssueService{
   ) {
 
     if (!data.title || !data.description || !data.type) {
-      throw new Error("Required fields missing");
+      throw new ValidationError("Required fields missing");
     }
-    console.log("inside service")
     return await this.issueRepo.create({
       ...data,
       userId,
@@ -32,7 +33,7 @@ export class IssueService{
 
   async getIssueById(userId: string, issueId: string) {
     const issue = await this.issueRepo.findById(issueId, userId);
-    if (!issue) throw new Error("Issue not found");
+    if (!issue) throw new AuthError("Issue not found");
     return issue;
   }
 
@@ -47,14 +48,14 @@ export class IssueService{
     }
   ) {
     const existing = await this.issueRepo.findById(issueId, userId);
-    if (!existing) throw new Error("Issue not found");
+    if (!existing) throw new AuthError("Issue not found");
 
     return this.issueRepo.update(issueId, userId, data);
   }
 
   async deleteIssue(userId: string, issueId: string) {
     const existing = await this.issueRepo.findById(issueId, userId);
-    if (!existing) throw new Error("Issue not found");
+    if (!existing) throw new AuthError("Issue not found");
 
     await this.issueRepo.delete(issueId, userId);
   }
