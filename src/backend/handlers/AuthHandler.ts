@@ -16,7 +16,7 @@ export class AuthHandler {
     //   });
       return res;
     } catch (error) {
-      return error;
+      return this.handleError(error);
     }
   }
   async login(req: Request) {
@@ -62,4 +62,6 @@ export class AuthHandler {
       { status: 500 }
     );
   }
+
+  
 }
