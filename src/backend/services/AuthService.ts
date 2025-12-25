@@ -25,9 +25,9 @@ export class AuthService {
       email: data.email,
       password: hashedPassword,
     });
-    // const token = JwtUtil.generateToken(user.id);
+    const token = JwtUtil.generateToken(user.id);
     await this.emailService.sendWelcomeEmail(user.email,user.name)
-    return { user };
+    return { user , token };
   }
 
   async login(data: { email: string; password: string }) {

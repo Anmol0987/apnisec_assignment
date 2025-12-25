@@ -2,21 +2,29 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 
 export default function Navbar() {
   const [loggedIn, setLoggedIn] = useState(false);
   const [loading, setLoading] = useState(true);
+
   const router = useRouter();
+  const pathname = usePathname();
+
+  async function checkAuth() {
+    try {
+      const res = await fetch("/api/auth/me");
+      setLoggedIn(res.ok);
+    } catch {
+      setLoggedIn(false);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   useEffect(() => {
-    fetch("/api/auth/me")
-      .then(res => {
-        if (res.ok) setLoggedIn(true);
-        else setLoggedIn(false);
-      })
-      .finally(() => setLoading(false));
-  }, []);
+    checkAuth();
+  }, [pathname]);
 
   async function logout() {
     await fetch("/api/auth/logout", { method: "POST" });
@@ -24,11 +32,10 @@ export default function Navbar() {
     router.push("/");
   }
 
-  if (loading) return null; // avoid UI flicker
+  if (loading) return null;
 
   return (
     <nav className="flex items-center justify-between px-6 py-4 border-b border-gray-800">
-      {/* Logo */}
       <Link
         href={loggedIn ? "/dashboard" : "/"}
         className="text-xl font-bold text-cyan-400"
@@ -36,33 +43,38 @@ export default function Navbar() {
         ApniSec
       </Link>
 
-      {/* Right side */}
       <div className="flex items-center gap-4">
         {!loggedIn && (
           <>
-            <Link
-              href="#features"
-              className="text-gray-300 hover:text-white"
-            >
+            <Link href="#features" className="text-gray-300 hover:text-white">
               Services
             </Link>
+
             <Link
               href="/login"
               className="bg-cyan-500 px-4 py-2 rounded text-black font-medium"
             >
               Login
             </Link>
+
+            <Link
+              href="/register"
+              className="border border-cyan-500 px-4 py-2 rounded text-cyan-400 hover:bg-cyan-500 hover:text-black transition"
+            >
+              Register
+            </Link>
           </>
         )}
 
         {loggedIn && (
           <>
-            <Link
-              href="/profile"
-              className="text-gray-300 hover:text-white"
-            >
+           <Link href="/dashboard" className="text-gray-300 hover:text-white">
+              Dashboard
+            </Link>
+            <Link href="/profile" className="text-gray-300 hover:text-white">
               Profile
             </Link>
+
             <button
               onClick={logout}
               className="bg-red-500 px-4 py-2 rounded text-black font-medium"
